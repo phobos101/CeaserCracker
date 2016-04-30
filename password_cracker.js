@@ -1,35 +1,63 @@
 (function(enteredKey, i) {
     'use strict';
 
-    const LIST = [
-        'test1',
-        'test2',
-        'test3',
-        'test4',
-        'test5'
-    ];
+    var fs = require('fs');
+
+    var list = [];
+
+    function start() {
+        function readLines(input, addToList) {
+            var remaining = '';
+
+            input.on('data', function(data) {
+                remaining += data;
+                var index = remaining.indexOf('\n');
+                while (index > -1) {
+                    var line = remaining.substring(0, index);
+                    remaining = remaining.substring(index + 1);
+                    addToList(line);
+                    index = remaining.indexOf('\n');
+                };
+            });
+
+            input.on('end', function() {
+                if (remaining.length > 0) {
+                    addToList(remaining);
+                } else {
+                    checkCipher()
+                };
+            });
+        }
+
+        function addToList(data) {
+            list.push(data);
+        };
+
+        var input = fs.createReadStream(process.argv[3]);
+        readLines(input, addToList);
+    };
 
     function checkCipher() {
         var found = false;
 
         do {
             for (var n = 1; n < 26; n++) {
-                var text = createCipher(LIST[i], n)
-                console.log('Trying key: ' + text)
+                var text = createCipher(list[i], n)
 
                 if (text === 'Not Found') {
                     found = true;
                     console.log(text);
                     break;
-                };
+                }
+                console.log('Trying key: ' + text);
 
-                found = tryKey(text)
+                found = tryKey(text);
                 if (found) break;
-            }
-            i++
+            };
+            i++;
         }
         while (found == false)
-    }
+    };
 
     function createCipher(word, offset) {
         if (!word) return 'Not Found';
@@ -45,13 +73,14 @@
     };
 
     function tryKey(cipherText) {
+        console.log(enteredKey)
         if (cipherText === enteredKey) {
-            console.log('\n=======\nFOUND: Key ' + enteredKey + ' = ' + LIST[i] + '\n=======');
+            console.log('\n=======\nFOUND: Key ' + enteredKey + ' = ' + list[i] + '\n=======');
             return true;
-        }
+        };
         return false;
     };
 
-    checkCipher()
+    start()
 
 })(process.argv[2], 0);
