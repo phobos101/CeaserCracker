@@ -46,7 +46,6 @@
 
                 if (text === 'Not Found') {
                     found = true;
-                    console.log(text);
                     break;
                 }
                 console.log('Trying key: ' + text);
@@ -65,7 +64,13 @@
             return char.charCodeAt(0);
         });
         var encipheredCharArray = charArray.map(function(char) {
-            return String.fromCharCode(char + offset);
+            if ((char + offset) > 126) {
+                // if the ASCII code is above 126, then wrap round.
+                //First valid chaarcter is 32 so we wrap round and then add on 33.
+                return String.fromCharCode((char + offset) - (126 - 33));
+            } else {
+                return String.fromCharCode(char + offset);
+            }
         });
         var cipherText = encipheredCharArray.join('');
 
@@ -73,7 +78,6 @@
     };
 
     function tryKey(cipherText) {
-        console.log(enteredKey)
         if (cipherText === enteredKey) {
             console.log('\n=======\nFOUND: Key ' + enteredKey + ' = ' + list[i] + '\n=======');
             return true;
